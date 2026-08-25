@@ -153,7 +153,7 @@ def get_orders(num_days=None, order_ids=None, sandbox=False, **kwargs):
             datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
             - datetime.timedelta(days=num_days)
         ).isoformat(timespec='milliseconds')
-        kwargs['filter'] = f"lastmodifieddate:[{last_modified_date}Z..]"
+        # kwargs['filter'] = f"lastmodifieddate:[{last_modified_date}Z..]"
 
     # Add order_ids as comma-separated string
     if order_ids:

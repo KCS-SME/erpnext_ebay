@@ -29,7 +29,6 @@
    "bold": 1,
    "fieldname": "sync_listings_button",
    "fieldtype": "Button",
-   "hidden": 1,
    "label": "Sync eBay UK Listings"
   },
   {

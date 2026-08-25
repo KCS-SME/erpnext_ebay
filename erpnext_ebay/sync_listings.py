@@ -336,9 +336,10 @@ def create_ebay_online_selling_item(listing, item_code,
         listing['ListingDetails']['EndTime'],
         '%Y-%m-%dT%H:%M:%S.%fZ')
     # Convert eBay UTC time to local time zone:
-    start_datetime = (
-        frappe.utils.convert_utc_to_system_timezone(utc_start_datetime))
-    end_datetime = frappe.utils.convert_utc_to_system_timezone(utc_end_datetime)
+    start_datetime = frappe.utils.convert_utc_to_system_timezone(
+            utc_start_datetime).replace(tzinfo=None)
+    end_datetime = frappe.utils.convert_utc_to_system_timezone(
+        utc_end_datetime).replace(tzinfo=None)
 
     # Sanitize URL
     selling_url = '<a href="{link}">{link}</a>'.format(

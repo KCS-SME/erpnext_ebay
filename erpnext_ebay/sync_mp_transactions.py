@@ -79,7 +79,7 @@ def archive_transactions(start_date, end_date):
         """)
     # Get transactions
     transactions_by_date = {x: [] for x in dates}
-    transactions = get_transactions(start_date=start_date, end_date=end_date)
+    transactions = get_transactions(start_date=start_date, end_date=end_date, sandbox= True )
     transactions.sort(key=operator.itemgetter('transaction_date'))
     for transaction in transactions:
         # Get date of transaction and append to list
@@ -119,7 +119,7 @@ def archive_transactions(start_date, end_date):
 
     # Get payouts
     payouts_by_date = {x: [] for x in dates}
-    payouts = get_payouts(start_date=start_date, end_date=end_date)
+    payouts = get_payouts(start_date=start_date, end_date=end_date, sandbox=True)
     payouts.sort(key=operator.itemgetter('payout_date'))
     for payout in payouts:
         # Get date of payout and append to list
@@ -218,7 +218,7 @@ def sync_mp_transactions(num_days=None, not_today=False,
     if num_days:
         num_days = min(num_days, MAX_DAYS)
     transactions = get_transactions(num_days=num_days,
-                                    start_date=start_date, end_date=end_date)
+                                    start_date=start_date, end_date=end_date, sandbox=True)
     transactions.sort(key=operator.itemgetter('transaction_date'))
 
     # Group transactions by date
@@ -436,7 +436,7 @@ def sync_mp_payouts(num_days=None, start_date=None, end_date=None,
     if num_days:
         num_days = min(num_days, MAX_DAYS)
     payouts = get_payouts(num_days=num_days,
-                          start_date=start_date, end_date=end_date)
+                          start_date=start_date, end_date=end_date,sandbox=True)
     payouts.sort(key=operator.itemgetter('payout_date'))
 
     for payout in payouts:

@@ -15,9 +15,9 @@ class eBayPlatform(OnlineSellingPlatformClass):
     object. This could just as easily be a dictionary, but there is no
     significant harm to using a class here."""
 
-    delete_entries_on_item_onload = True
+    delete_entries_on_item_onload = False
 
-    delete_entries_on_item_save = True
+    delete_entries_on_item_save = False
 
     @classmethod
     def item_async_entries(cls, item_code, subtypes):
@@ -30,13 +30,17 @@ class eBayPlatform(OnlineSellingPlatformClass):
         if not enable_ebay:
             return []
 
+        ebay_sku = frappe.db.get_value('Item', item_code, 'ebay_sku')
+        if not ebay_sku:
+            return []
+
         entries = []
 
         site_ids = cls.get_site_ids(subtypes)
 
         # Get listings from GetSellerList (US site, so we get SiteID)
         get_seller_listings = get_seller_list(
-            item_codes=[item_code], site_id=0,
+            item_codes=[ebay_sku], site_id=0,
             output_selector=OUTPUT_SELECTOR, granularity_level='Fine',
             days_before=60, days_after=59, active_only=False)
 
