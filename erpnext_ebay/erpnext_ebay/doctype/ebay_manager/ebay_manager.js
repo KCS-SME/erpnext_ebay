@@ -16,9 +16,7 @@ frappe.ui.form.on('eBay Manager', {
     sync_orders_rest_button(frm) {
         frappe.call({
             method: "erpnext_ebay.sync_orders_rest.sync_orders",
-            args: {
-                sandbox : 1
-            },
+            args: {},
             freeze: true,
             freeze_message: "Syncing eBay customers and orders; this may take some time..."
         });
@@ -27,10 +25,7 @@ frappe.ui.form.on('eBay Manager', {
     sync_transactions_button(frm) {
         frappe.call({
             method: "erpnext_ebay.sync_mp_transactions.sync_mp_transactions",
-            args: {
-                site_id: 0,
-                sandbox : 1
-            },
+            args: {},
             freeze: true,
             freeze_message: "Syncing eBay transactions; this may take some time..."
         });
@@ -39,9 +34,7 @@ frappe.ui.form.on('eBay Manager', {
     sync_payouts_button(frm) {
         frappe.call({
             method: "erpnext_ebay.sync_mp_transactions.sync_mp_payouts",
-            args: {
-                sandbox : 1
-            },
+            args: {},
             freeze: true,
             freeze_message: "Syncing eBay payouts; this may take some time..."
         });
@@ -50,9 +43,7 @@ frappe.ui.form.on('eBay Manager', {
     sync_listings_button(frm) {
         frappe.call({
             method: "erpnext_ebay.sync_listings.sync",
-            args: {
-                site_id: 0
-            },
+            args: {},
             freeze: true,
             freeze_message: "Syncing eBay UK listings; this may take some time..."
         });
@@ -62,7 +53,6 @@ frappe.ui.form.on('eBay Manager', {
         frappe.call({
             method: "erpnext_ebay.ebay_categories.category_sync",
             args: {
-                site_id: 3,
                 force_override_categories: true
             },
             freeze: true,
