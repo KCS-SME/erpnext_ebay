@@ -171,13 +171,7 @@ def accept_consent_token():
 
     user_access = r.json()
     if user_access['token_type'] != 'User Access Token':
-        return frappe.respond_as_web_page(
-            title='Authorization Failed',
-            html="""
-                <p><b>Invalid credentials.<b> Please check your App ID and Cert ID
-                in eBay API Settings and try again.</p>""",
-            success=False
-        )
+        frappe.throw('Invalid parameters!')
     refresh_token = user_access['refresh_token']
     refresh_expiry = (
         datetime.datetime.now(datetime.timezone.utc)
