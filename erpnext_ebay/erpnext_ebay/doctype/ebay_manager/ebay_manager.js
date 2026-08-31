@@ -43,9 +43,7 @@ frappe.ui.form.on('eBay Manager', {
     sync_listings_button(frm) {
         frappe.call({
             method: "erpnext_ebay.sync_listings.sync",
-            args: {
-                site_id: 3
-            },
+            args: {},
             freeze: true,
             freeze_message: "Syncing eBay UK listings; this may take some time..."
         });
@@ -55,7 +53,6 @@ frappe.ui.form.on('eBay Manager', {
         frappe.call({
             method: "erpnext_ebay.ebay_categories.category_sync",
             args: {
-                site_id: 3,
                 force_override_categories: true
             },
             freeze: true,

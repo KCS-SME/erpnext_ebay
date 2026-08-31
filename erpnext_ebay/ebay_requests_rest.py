@@ -17,7 +17,7 @@ from erpnext_ebay.ebay_get_requests import ebay_logger
 from erpnext_ebay.ebay_tokens import get_api
 from erpnext_ebay.erpnext_ebay.doctype.ebay_manager_settings.ebay_manager_settings\
     import use_sandbox
-
+from erpnext_ebay.erpnext_ebay.doctype.ebay_manager_settings.ebay_manager_settings import use_sandbox
 
 def handle_ebay_error(e):
     """Throw an appropriate Frappe error message on error."""
@@ -79,6 +79,8 @@ def check_for_warnings(api_response):
 
 def single_api_call(api_call, sandbox=False, *args, **kwargs):
     """Make a non-paged API call. Handles warnings and errors."""
+    if not sandbox:
+        sandbox = use_sandbox()
     api = get_api(sandbox=sandbox, marketplace_id=HOME_GLOBAL_ID)
     call = getattr(api, api_call)
     # Add x_ebay_c_marketplace_id parameter if required
@@ -101,6 +103,8 @@ def single_api_call(api_call, sandbox=False, *args, **kwargs):
 
 def paged_api_call(api_call, record_field, sandbox=False, *args, **kwargs):
     """Make a paged API call. Handles warnings and errors."""
+    if not sandbox:
+        sandbox = use_sandbox()
     api = get_api(sandbox=sandbox, marketplace_id=HOME_GLOBAL_ID)
     call = getattr(api, api_call)
     # Add x_ebay_c_marketplace_id parameter if required
@@ -153,7 +157,7 @@ def get_orders(num_days=None, order_ids=None, sandbox=False, **kwargs):
             datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
             - datetime.timedelta(days=num_days)
         ).isoformat(timespec='milliseconds')
-        kwargs['filter'] = f"lastmodifieddate:[{last_modified_date}Z..]"
+        # kwargs['filter'] = f"lastmodifieddate:[{last_modified_date}Z..]"
 
     # Add order_ids as comma-separated string
     if order_ids:

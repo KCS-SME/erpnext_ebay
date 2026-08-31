@@ -15,9 +15,9 @@ class eBayPlatform(OnlineSellingPlatformClass):
     object. This could just as easily be a dictionary, but there is no
     significant harm to using a class here."""
 
-    delete_entries_on_item_onload = True
+    delete_entries_on_item_onload = False
 
-    delete_entries_on_item_save = True
+    delete_entries_on_item_save = False
 
     @classmethod
     def item_async_entries(cls, item_code, subtypes):
@@ -29,6 +29,7 @@ class eBayPlatform(OnlineSellingPlatformClass):
             'eBay Manager Settings', 'enable_ebay')
         if not enable_ebay:
             return []
+
 
         entries = []
 
