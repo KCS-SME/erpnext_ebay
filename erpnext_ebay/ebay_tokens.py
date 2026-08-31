@@ -161,7 +161,13 @@ def accept_consent_token():
 
     # Process response
     if not r.ok:
-        frappe.throw('Invalid parameters!')
+        return frappe.respond_as_web_page(
+            title='Authorization Failed',
+            html="""
+                <p>Invalid credentials. Please check your App ID and Cert ID
+                in eBay API Settings and try again.</p>""",
+            success=False
+        )
 
     user_access = r.json()
     if user_access['token_type'] != 'User Access Token':
