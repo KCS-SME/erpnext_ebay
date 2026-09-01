@@ -10,6 +10,7 @@
   "sandbox_cert_id",
   "sandbox_ru_name",
   "sandbox_scopes",
+  "sandbox_auth_token",
   "authorize_sandbox_button",
   "sandbox_refresh_token",
   "sandbox_refresh_expiry",
@@ -24,6 +25,7 @@
   "production_cert_id",
   "production_ru_name",
   "production_scopes",
+  "production_auth_token",
   "authorize_production_button",
   "production_refresh_token",
   "production_refresh_expiry",
@@ -201,6 +203,18 @@
    "fieldtype": "Data",
    "label": "Production public key (JWE)",
    "read_only": 1
+  },
+  {
+   "fieldname": "sandbox_auth_token",
+   "fieldtype": "Password",
+   "label": "Auth Token",
+   "length": 500
+  },
+  {
+   "fieldname": "production_auth_token",
+   "fieldtype": "Password",
+   "label": "Auth Token",
+   "length": 500
   }
  ],
  "issingle": 1,
