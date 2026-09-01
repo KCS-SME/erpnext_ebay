@@ -260,16 +260,18 @@ def get_trading_api(site_id=HOME_SITE_ID, warnings=True, timeout=EBAY_TIMEOUT,
         sandbox = bool(force_sandbox_value)
 
     domain = 'api.sandbox.ebay.com' if sandbox else 'api.ebay.com'
-    prefix = 'ebay_sandbox' if sandbox else 'ebay_production'
+    prefix = 'sandbox' if sandbox else 'production'
+
+    settings = frappe.get_single('eBay API Settings')
 
     trading_kwargs = {
         'domain': domain,
         'config_file': None,
-        'compatability': frappe.conf.get(f'{prefix}_compatability', 719),
-        'appid': frappe.conf.get(f'{prefix}_appid'),
-        'certid': frappe.conf.get(f'{prefix}_certid'),
-        'devid': frappe.conf.get(f'{prefix}_devid'),
-        'token': frappe.conf.get(f'{prefix}_token'),
+        'compatability': 719,
+        'appid': settings.get(f'{prefix}_app_id'),
+        'certid': settings.get_password(f'{prefix}_cert_id'),
+        'devid': settings.get(f'{prefix}_ru_name'),
+        'token': settings.get_password(f'{prefix}_auth_token'),
         'siteid': site_id,
         'warnings': warnings,
         'timeout': timeout
