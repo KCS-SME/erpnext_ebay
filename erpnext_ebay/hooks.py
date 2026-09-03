@@ -115,8 +115,16 @@ doc_events = {
         "onload":
             "erpnext_ebay.custom_methods.item_methods.item_onload",
         "before_save":
-            "erpnext_ebay.custom_methods.item_methods.item_before_save"
-    }
+            "erpnext_ebay.custom_methods.item_methods.item_before_save",
+        "on_update":
+            "erpnext_ebay.sync_listings.sync_item_to_ebay"
+    },
+    "File": {
+        "after_insert":
+            "erpnext_ebay.sync_listings.sync_item_images_on_file_change",
+        "on_trash":
+            "erpnext_ebay.sync_listings.sync_item_images_on_file_change",
+    },
 }
 
 # Scheduled Tasks

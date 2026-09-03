@@ -15,6 +15,9 @@ from .ebay_constants import (LISTING_DURATION_TOKEN_DICT, EBAY_SITE_IDS,
                              EBAY_SITE_DOMAINS, HOME_SITE_ID)
 
 from collections.abc import Sequence
+from erpnext_ebay.ebay_revise_requests import revise_item, end_items 
+from .ebay_do_requests import add_item
+from urllib.parse import quote
 
 OUTPUT_SELECTOR = [
     'ItemArray.Item.ListingDetails.StartTime',
@@ -185,6 +188,94 @@ def format_shipping_services(site_id, shipping):
 
     return '\n'.join(shipping_strings)
 
+def sync_item_to_ebay(doc, method=None):
+    frappe.enqueue(
+        'erpnext_ebay.sync_listings._sync_item_to_ebay_job',
+        queue='short',
+        item_code=doc.name,
+        publish=doc.custom_publish_on_ebay,
+        job_name=f'ebay-sync-{doc.name}'
+    )
+
+def _sync_item_to_ebay_job(item_code, publish):
+    doc = frappe.get_doc('Item', item_code)
+    item_dict = {
+        'Country': 'US',
+        'Currency': 'USD',
+        'SKU': doc.custom_sku or doc.item_code,
+        'Title': (doc.item_name or doc.item_code)[:80],
+        'Description': f'<![CDATA[{doc.description}]]>',
+        'PrimaryCategory': {
+            'CategoryID': frappe.db.get_value(
+                'Item Group', doc.item_group,'custom_ebay_categoryid')},
+        'StartPrice': doc.standard_rate,
+        'Location': 'KRA Warehouse',
+        'ConditionID': 1000,
+        'ItemSpecifics': {
+            'NameValueList': [
+                {'Name': 'Brand', 'Value': doc.brand or 'Unbranded'},
+                {'Name': 'Model', 'Value': doc.custom_model_number or 'no model number'},
+            ]
+        },
+        'Quantity':200,
+    }
+    picture_urls = get_item_picture_urls(doc)
+
+    if picture_urls:
+        item_dict['PictureDetails'] = {'PictureURL': picture_urls}
+
+    if doc.custom_publish_on_ebay and not doc.ebay_id:
+        result = add_item(doc.item_code, item_dict)
+        frappe.db.set_value('Item', doc.item_code, 'ebay_id', result['ItemID'])
+        frappe.db.commit()
+
+    elif doc.custom_publish_on_ebay and doc.ebay_id:
+        revise_item(doc.ebay_id, item_dict= item_dict)
+
+    elif not doc.custom_publish_on_ebay and doc.ebay_id:
+        end_items([{'ItemID': doc.ebay_id, 'EndingReason': 'NotAvailable'}])
+        frappe.db.set_value('Item', doc.item_code, 'ebay_id', '')
+        frappe.db.commit()
+
+def sync_item_images_on_file_change(doc, method=None):
+    if doc.attached_to_doctype != 'Item':
+        return
+
+    item = frappe.get_doc('Item', doc.attached_to_name)
+
+    if not item.get('custom_publish_on_ebay') or not item.ebay_id:
+        return
+
+    exclude_name = doc.name if method == 'on_trash' else None
+    picture_urls = get_item_picture_urls(item, exclude_file=exclude_name)
+
+    if picture_urls:
+        item_dict = {'PictureDetails': {'PictureURL': picture_urls}}
+        deleted_fields = None
+    else:
+        item_dict = {}
+        deleted_fields = ['Item.PictureDetails.PictureURL']
+
+    revise_item(item.ebay_id, item_dict=item_dict, deleted_fields=deleted_fields)
+
+
+def get_item_picture_urls(doc, exclude_file=None):
+    base_url = frappe.utils.get_url()
+    filters = {
+        'attached_to_doctype': 'Item',
+        'attached_to_name': doc.name,
+    }
+    if exclude_file:
+        filters['name'] = ['!=', exclude_file]
+
+    files = frappe.get_all('File', filters=filters, fields=['file_url'], order_by='creation asc')
+
+    urls = []
+    for f in files:
+        url = f.file_url if f.file_url.startswith('http') else base_url + quote(f.file_url)
+        if url not in urls:
+            urls.append(url)
+    return urls
 
 @frappe.whitelist()
 def sync(site_id=HOME_SITE_ID, update_ebay_id=False):
