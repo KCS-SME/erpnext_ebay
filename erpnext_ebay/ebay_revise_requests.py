@@ -68,11 +68,12 @@ def relist_item(ebay_id, site_id=HOME_SITE_ID, item_dict=None):
     return response_dict
 
 
-def revise_item(ebay_id, site_id=HOME_SITE_ID, item_dict=None):
+def revise_item(ebay_id, site_id=HOME_SITE_ID, item_dict=None, deleted_fields=None):
     """Perform a ReviseItem call."""
 
-    revise_dict = {'Item': item_dict or {}}
-    revise_dict['Item']['ItemID'] = ebay_id
+    revise_dict = {'Item': {'ItemID': ebay_id, **(item_dict or {})}}
+    if deleted_fields:
+        revise_dict['DeletedField'] = deleted_fields
 
     try:
         # Initialize TradingAPI

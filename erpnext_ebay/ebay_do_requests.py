@@ -66,7 +66,7 @@ def ebay_message_to_partner(user_id, item_id, body, subject,
 
 
 def add_item(item_code, item_details=None):
-    """Add an item for testing purposes."""
+    """Add a new item as an eBay listing."""
 
     # Check we are using the Sandbox
     if not use_sandbox('AddItem'):
@@ -76,33 +76,33 @@ def add_item(item_code, item_details=None):
         item_details = {}
 
     item_dict = {
-        'Country': 'GB',
-        'Currency': 'GBP',
-        'Description': '<![CDATA[<p>This is a test item.</p>]]>',
-        'DispatchTimeMax': 3,
+        # 'Country': 'GB',
+        # 'Currency': 'GBP',
+        # 'Description': '<![CDATA[<p>This is a test item.</p>]]>',
+        # 'DispatchTimeMax': 3,
         'ListingDuration': 'GTC',
         'ListingType': 'FixedPriceItem',
-        'Location': 'A galaxy far, far away',
-        'PaymentMethods': ['CashOnPickup', 'PayPal'],
-        'PayPalEmailAddress': 'test@example.com',
-        'PictureDetails': {
-            'PictureURL': ['https://picsum.photos/id/1020/500']
-        },
-        'PrimaryCategory': {
-            'CategoryID': '29223'
-        },
-        'Quantity': 1,
-        'ReturnPolicy': {
-            'ReturnsAcceptedOption': 'ReturnsAccepted'
-        },
+        # 'Location': 'A galaxy far, far away',
+        # 'PaymentMethods': ['CashOnPickup', 'PayPal'],
+        # 'PayPalEmailAddress': 'test@example.com',
+        # 'PictureDetails': {
+        #     'PictureURL': ['https://picsum.photos/id/1020/500']
+        # },
+        # 'PrimaryCategory': {
+        #     'CategoryID': '29223'
+        # },
+        # 'Quantity': 1,
+        # 'ReturnPolicy': {
+        #     'ReturnsAcceptedOption': 'ReturnsAccepted'
+        # },
         'ShipToLocations': ['None'],
-        'Site': 'UK',
-        'SKU': item_code,
-        'StartPrice': 10.0,
-        'Title': 'TestItem: Test Item erpnext_ebay'
+        # 'Site': 'UK',
+        # 'SKU': item_code,
+        # 'StartPrice': 10.0,
+        # 'Title': 'TestItem: Test Item erpnext_ebay'
     }
-
-    item_dict.update(item_details)
+    if item_details:
+        item_dict.update(item_details)
 
     return trading_api_call('AddItem', {'Item': item_dict},
                             force_sandbox_value=True)
