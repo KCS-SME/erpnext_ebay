@@ -125,6 +125,9 @@ doc_events = {
         "on_trash":
             "erpnext_ebay.sync_listings.sync_item_images_on_file_change",
     },
+    "Stock Ledger Entry": {
+        "after_insert": "erpnext_ebay.sync_listings.sync_qty_on_sle_change",
+    },
 }
 
 # Scheduled Tasks

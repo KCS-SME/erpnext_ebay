@@ -15,6 +15,7 @@ from .ebay_constants import (LISTING_DURATION_TOKEN_DICT, EBAY_SITE_IDS,
                              EBAY_SITE_DOMAINS, HOME_SITE_ID)
 
 from collections.abc import Sequence
+from erpnext.accounts.doctype.pos_invoice.pos_invoice import get_stock_availability
 from erpnext_ebay.ebay_revise_requests import revise_item, end_items 
 from .ebay_do_requests import add_item
 from urllib.parse import quote
@@ -189,6 +190,15 @@ def format_shipping_services(site_id, shipping):
     return '\n'.join(shipping_strings)
 
 def sync_item_to_ebay(doc, method=None):
+    if doc.custom_publish_on_ebay and not doc.ebay_id:
+        qty = get_available_qty(doc)
+        if qty <= 0:
+            frappe.throw(
+                f'Cannot publish "{doc.item_code}" to eBay: '
+                f'available inventory quantity is {qty}. '
+                f'Please ensure sufficient stock before publishing.'
+            )
+
     frappe.enqueue(
         'erpnext_ebay.sync_listings._sync_item_to_ebay_job',
         queue='short',
@@ -217,7 +227,7 @@ def _sync_item_to_ebay_job(item_code, publish):
                 {'Name': 'Model', 'Value': doc.custom_model_number or 'no model number'},
             ]
         },
-        'Quantity':200,
+        'Quantity': get_available_qty(doc),
     }
     picture_urls = get_item_picture_urls(doc)
 
@@ -276,6 +286,39 @@ def get_item_picture_urls(doc, exclude_file=None):
         if url not in urls:
             urls.append(url)
     return urls
+
+def get_available_qty(doc):
+    warehouses = frappe.get_all(
+        'Warehouse',
+        filters={'disabled': 0, 'is_group': 0},
+        pluck='name'
+    )
+
+    total_qty = 0
+    for warehouse in warehouses:
+        qty, is_stock_item, _ = get_stock_availability(doc.item_code, warehouse)
+        if not is_stock_item:
+            return 0
+        total_qty += qty
+
+    return max(int(total_qty), 0)
+
+def sync_qty_on_sle_change(doc, method=None):
+    frappe.db.after_commit.add(
+        lambda: sync_qty_after_commit(doc.item_code)
+    )
+
+def sync_qty_after_commit(item_code):
+    item = frappe.get_doc('Item', item_code)
+    if not item.get('custom_publish_on_ebay') or not item.ebay_id:
+        return
+    new_qty = get_available_qty(item)
+    if new_qty <= 0:
+        end_items([{'ItemID': item.ebay_id, 'EndingReason': 'NotAvailable'}])
+        frappe.db.set_value('Item', item.item_code, 'ebay_id', '')
+        frappe.db.commit()
+    else:
+        revise_item(item.ebay_id, item_dict={'Quantity': new_qty})
 
 @frappe.whitelist()
 def sync(site_id=HOME_SITE_ID, update_ebay_id=False):
